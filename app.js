@@ -2,7 +2,8 @@ const express =require('express');
 const app = express();
 const usermodel = require('./models/user'); // Import the user model
 require('dotenv').config();
-
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 
 const path = require('path');
@@ -21,17 +22,34 @@ app.get('/',(req,res)=>{
 })
 
 app.post('/create', async(req,res)=>{
-     let { username, password, email, age } = req.body; // Extract data from the request body
-     // Create a new user document using the user model
-    let createduser = await usermodel.create({
-         username,
-         password,
+    const { username, password, email, age } = req.body;
+
+    try {
+        // 🔐 Step 1: Generate salt
+        const saltRounds = 10;
+        const salt = await bcrypt.genSalt(saltRounds);
+
+        // 🔐 Step 2: Hash the password using the generated salt
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // 🧬 Step 3: Save the user with the hashed password
+        const createdUser = await usermodel.create({
+        username,
+        password: hashedPassword,
         email,
         age
-    })
-    res.send('User created successfully'); // Send a response back to the client
+        });
+
+        res.send('User created successfully with hashed password ✅');
+    } catch (err) {
+        console.error('Error creating user:', err);
+        res.status(500).send('Something went wrong ❌');
+    }
 });
+
+
+
 
 app.listen(3000,()=>{
     console.log('Server is running on port 3000');
-})
+});
