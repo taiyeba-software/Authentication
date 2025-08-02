@@ -2,13 +2,18 @@ const mongoose =require('mongoose');
 require('dotenv').config();
 // Connect to MongoDB using Mongoose
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true
-})
-.then(() => console.log("MongoDB Connected ✅"))
-.catch((err) => console.log("MongoDB Connection Error ❌", err));
+mongoose.set('debug', true);
 
+  function connectDB() {
+    mongoose.connect(process.env.MONGO_URI, {
+    //  useNewUrlParser: true,
+      //useUnifiedTopology: true
+    })
+    .then(() => console.log("MongoDB Connected ✅"))
+    .catch((err) => console.log("MongoDB Connection Error ❌", err));
+  }
+
+  connectDB();
 const userSchema = new mongoose.Schema({
     username:String,
     password:String,
